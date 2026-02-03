@@ -11,10 +11,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * ViewModel para manejar el record persistente.
- */
 class MiViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val database = AppDatabase.getDatabase(application)
+    private val repository = RecordRepository(database.recordDao())
 
     private val _record = MutableStateFlow(0)
     val record: StateFlow<Int> = _record.asStateFlow()
@@ -22,7 +22,6 @@ class MiViewModel(application: Application) : AndroidViewModel(application) {
     private val _recordTexto = MutableStateFlow("Sin récord")
     val recordTexto: StateFlow<String> = _recordTexto.asStateFlow()
 
-    // AÑADIDO: Para mostrar en el recuadro de RÉCORD
     private val _recordParaRecuadro = MutableStateFlow("0")
     val recordParaRecuadro: StateFlow<String> = _recordParaRecuadro.asStateFlow()
 
@@ -32,41 +31,50 @@ class MiViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun cargarRecordGuardado() {
         viewModelScope.launch {
-            val (score, timestamp) = ControladorPreference.obtenerRecordCompleto(getApplication())
-            _record.value = score
+            val recordEntity = repository.getRecord()
 
-            // AÑADIDO: Actualizar también el record para el recuadro
-            _recordParaRecuadro.value = score.toString()
+            if (recordEntity != null) {
+                _record.value = recordEntity.score
+                _recordParaRecuadro.value = recordEntity.score.toString()
 
-            if (timestamp > 0) {
-                val date = Date(timestamp)
+                val date = Date(recordEntity.timestamp)
                 val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date)
                 val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
-                _recordTexto.value = "Récord: $score ($fecha $hora)"
+                _recordTexto.value = "Récord: ${recordEntity.score} ($fecha $hora)"
             } else {
+                _record.value = 0
+                _recordParaRecuadro.value = "0"
                 _recordTexto.value = "Sin récord"
             }
         }
     }
 
     fun verificarYActualizarRecord(posibleRecord: Int): Boolean {
-        val recordActual = ControladorPreference.obtenerRecordScore(getApplication())
+        val recordActual = _record.value
 
         if (posibleRecord > recordActual) {
-            ControladorPreference.actualizarRecord(getApplication(), posibleRecord)
-            _record.value = posibleRecord
+            viewModelScope.launch {
+                repository.saveRecord(posibleRecord)
+                _record.value = posibleRecord
+                _recordParaRecuadro.value = posibleRecord.toString()
 
-            // AÑADIDO: Actualizar también el record para el recuadro
-            _recordParaRecuadro.value = posibleRecord.toString()
-
-            val now = Date()
-            val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(now)
-            val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
-            _recordTexto.value = "Récord: $posibleRecord ($fecha $hora)"
-
+                val now = Date()
+                val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(now)
+                val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+                _recordTexto.value = "Récord: $posibleRecord ($fecha $hora)"
+            }
             return true
         }
-
         return false
+    }
+
+    // Método para limpiar el récord (opcional)
+    fun clearRecord() {
+        viewModelScope.launch {
+            repository.clearRecord()
+            _record.value = 0
+            _recordParaRecuadro.value = "0"
+            _recordTexto.value = "Sin récord"
+        }
     }
 }

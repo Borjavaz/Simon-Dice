@@ -32,6 +32,8 @@ class VM : ViewModel() {
     private val _botonesBrillantes = MutableStateFlow(false)
     val botonesBrillantes: StateFlow<Boolean> = _botonesBrillantes.asStateFlow()
 
+    private val _sonidoEvent = MutableStateFlow<SonidoEvent?>(null)
+    val sonidoEvent: StateFlow<SonidoEvent?> = _sonidoEvent.asStateFlow()
 
     // Para record persistente
     private var recordViewModel: MiViewModel? = null
@@ -103,6 +105,7 @@ class VM : ViewModel() {
         for ((index, colorInt) in secuencia.withIndex()) {
             //ILUMINA Y DISPARA EVENTO DE SONIDO
             _colorActivo.value = colorInt
+            _sonidoEvent.value = SonidoEvent.ColorSound(colorInt)
             delay(velocidadMostrarColor)
 
             // APAGA
@@ -137,6 +140,7 @@ class VM : ViewModel() {
 
             // ILUMINA Y DISPARA EVENTO DE SONIDO
             _colorActivo.value = colorInt
+            _sonidoEvent.value = SonidoEvent.ColorSound(colorInt)
             delay(400)
             _colorActivo.value = -1
 
@@ -149,12 +153,14 @@ class VM : ViewModel() {
         val indiceActual = secuenciaUsuario.size - 1
 
         if (secuenciaUsuario[indiceActual] != secuencia[indiceActual]) {
+            _sonidoEvent.value = SonidoEvent.Error
             verificarRecordPersistente()
             gameOver()
             return
         }
 
         if (secuenciaUsuario.size == secuencia.size) {
+            _sonidoEvent.value = SonidoEvent.Victory
             verificarRecordPersistente()
             secuenciaCorrecta()
         } else {
@@ -193,6 +199,7 @@ class VM : ViewModel() {
         repeat(2) {
             for (i in 0..3) {
                 _colorActivo.value = i
+                _sonidoEvent.value = SonidoEvent.ColorSound(i)
                 delay(150)
             }
             _colorActivo.value = -1
@@ -222,6 +229,7 @@ class VM : ViewModel() {
                 repeat(2) {
                     for (i in 0..3) {
                         _colorActivo.value = i
+                        _sonidoEvent.value = SonidoEvent.ColorSound(i)
                         delay(150)
                     }
                     _colorActivo.value = -1
@@ -231,5 +239,9 @@ class VM : ViewModel() {
                 _text.value = "RÉCORD: ${_record.value} - PRESIONA START"
             }
         }
+    }
+
+    fun clearSoundEvent() {
+        _sonidoEvent.value = null
     }
 }

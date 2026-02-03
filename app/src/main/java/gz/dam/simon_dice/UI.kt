@@ -31,13 +31,12 @@ fun SimonDiceUI(
     val text by gameViewModel.text.collectAsState()
     val colorActivo by gameViewModel.colorActivo.collectAsState()
     val botonesBrillantes by gameViewModel.botonesBrillantes.collectAsState()
+    val sonidoEvent by gameViewModel.sonidoEvent.collectAsState()
 
     // Record persistente
     val recordPersistente by miViewModel.recordTexto.collectAsState()
     // AÑADIDO: Record persistente para el recuadro
     val recordPersistenteRecuadro by miViewModel.recordParaRecuadro.collectAsState()
-
-    // Efecto para manejar sonidos
 
 
     Column(
