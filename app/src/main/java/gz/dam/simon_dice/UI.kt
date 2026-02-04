@@ -244,3 +244,4 @@ fun BotonControl(viewModel: VM, gameState: GameState) {
 }
 
 
+

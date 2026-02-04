@@ -21,3 +21,4 @@ val SimonRedDark = Color(0xFFB71C1C)
 val SimonGreenDark = Color(0xFF1B5E20)
 val SimonBlueDark = Color(0xFF0D47A1)
 val SimonYellowDark = Color(0xFFF57F17)
+
