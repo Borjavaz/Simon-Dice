@@ -1,5 +1,5 @@
 # Tarea: Generador de README Profesional
-"Actúa como un Technical Writer experto. Borja necesita un archivo README.md para su proyecto de Android.
+"Actúa como un desarroyador ayudante que pica codigo para Borja. Borja necesita un archivo README.md para su proyecto de Android.
 Basándote en el código y la estructura que te paso, genera un README que incluya:
 1. **Título impactante**
 2. **Descripción del proyecto:** Qué hace la app y a quién ayuda.
