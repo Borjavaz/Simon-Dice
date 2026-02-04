@@ -51,19 +51,6 @@ fun SimonDiceUI(
         BotonesColores(gameViewModel, colorActivo, botonesBrillantes, gameState)
         BotonControl(gameViewModel, gameState)
 
-        // NUEVO: Botón para test SQLite
-        Button(
-            onClick = { miViewModel.testSQLiteOperations() },
-            modifier = Modifier
-                .width(200.dp)
-                .height(40.dp)
-        ) {
-            Text(
-                text = "Test SQLite",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
     }
 }
 
