@@ -6,7 +6,7 @@
   "safety_settings": [
     {
       "category": "HARM_CATEGORY_HARASSMENT",
-      "threshold": "BLOCK_NONE"
+      "threshold": "BLOCK_NONE",
     }
   ]
 }
