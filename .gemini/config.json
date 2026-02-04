@@ -1,0 +1,12 @@
+{
+  "model": "gemini-1.5-flash",
+  "temperature": 0.1,
+  "top_p": 1.0,
+  "max_output_tokens": 8192,
+  "safety_settings": [
+    {
+      "category": "HARM_CATEGORY_HARASSMENT",
+      "threshold": "BLOCK_NONE"
+    }
+  ]
+}
