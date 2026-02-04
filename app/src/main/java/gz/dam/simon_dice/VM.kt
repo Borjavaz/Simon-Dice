@@ -242,3 +242,68 @@ class VM : ViewModel() {
         }
     }
 }
+/*
+1. ControladorSQLite.kt (NOMBRE CAMBIADO)
+ANTES: ControladorPreference.kt usaba SharedPreferences
+
+
+AHORA: ControladorSQLite.kt usa base de datos SQLite
+
+
+CAMBIOS PRINCIPALES:
+
+
+Se crea clase SimonDiceDBHelper que extiende SQLiteOpenHelper
+
+
+Se define tabla records con columnas: _id, score, timestamp, player_name
+
+
+Nuevas funciones para CRUD completo (insertar, consultar, eliminar)
+
+
+Logging extensivo en todas las operaciones
+
+
+Se guarda histórico completo, no solo el mejor record
+
+
+2. MiViewModel.kt (MODIFICADO)
+CAMBIOS:
+
+
+Cambia de usar ControladorPreference a ControladorSQLite
+
+
+Nuevo Flow _dbInfo para mostrar información de la BD
+
+
+Nueva función mostrarTodosRecordsEnLogcat() para debugging
+
+
+Nueva función testSQLiteOperations() para testing manual
+
+
+Mensajes actualizados para indicar "SQLite"
+
+
+3. VM.kt (MODIFICADO LEVEMENTE)
+CAMBIOS:
+
+
+En verificarRecordPersistente() agrega logs específicos de SQLite
+
+
+Se mantiene la lógica del juego intacta
+
+
+4. UI.kt (MODIFICADO)
+CAMBIOS:
+
+
+Agrega parámetro dbInfo a HeaderInfo()
+
+
+Muestra información de la base de datos en gris pequeño
+
+ */
