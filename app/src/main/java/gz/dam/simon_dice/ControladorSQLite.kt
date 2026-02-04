@@ -341,7 +341,6 @@ object ControladorSQLite {
             db.delete(TABLE_RECORDS, null, null)
             db.close()
 
-
             Log.d("SQLite_Top10", "Todos los records eliminados")
         } catch (e: Exception) {
             Log.e("SQLite", "Error al eliminar records: ${e.message}")
