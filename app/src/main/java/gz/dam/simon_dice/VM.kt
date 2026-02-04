@@ -245,3 +245,51 @@ class VM : ViewModel() {
         _sonidoEvent.value = null
     }
 }
+
+/*
+📁 ARCHIVOS NUEVOS (Room):
+AppDatabase.kt - Configuración principal de Room Database
+
+RecordEntity.kt - Entidad de datos con @Entity (tabla "records")
+
+RecordDao.kt - DAO con consultas SQL (CRUD operations)
+
+RecordRepository.kt - Patrón Repository (capa de abstracción)
+
+🔄 ARCHIVO MODIFICADO CRÍTICO:
+MiViewModel.kt:
+ANTES:
+
+kotlin
+val (score, timestamp) = ControladorPreference.obtenerRecordCompleto(getApplication())
+AHORA:
+
+kotlin
+private val database = AppDatabase.getDatabase(application)
+private val repository = RecordRepository(database.recordDao())
+val recordEntity = repository.getRecord()
+❌ ARCHIVO ELIMINADO:
+ControladorPreference.kt - Eliminado completamente
+
+🏗️ ARQUITECTURA NUEVA:
+text
+ViewModel → Repository → DAO → Room Database (SQLite)
+⚙️ CAMBIO EN EL FLUJO DE DATOS:
+Operación	Master (SharedPreferences)	Room
+Guardar	ControladorPreference.actualizarRecord()	repository.saveRecord()
+Cargar	ControladorPreference.obtenerRecordCompleto()	repository.getRecord()
+Base	Archivo XML	Base de datos SQLite
+✅ LO QUE NO CAMBIA:
+La interfaz del ViewModel (verificarYActualizarRecord())
+
+La UI (Compose) - no hay cambios visuales
+
+La lógica del juego en VM.kt
+
+La experiencia del usuario
+
+🎯 CAMBIO REAL:
+Solo la capa de persistencia - de un simple archivo XML (SharedPreferences) a una base de datos SQLite con ORM (Room).
+
+RESUMEN FINAL: Se reemplazó SharedPreferences por Room manteniendo 100% de la funcionalidad existente. Solo cambia la implementación interna de cómo se guardan los datos.
+ */
