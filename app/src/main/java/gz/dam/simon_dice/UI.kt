@@ -24,6 +24,7 @@ fun SimonDiceUI(
 ) {
     val context = LocalContext.current
 
+
     // Estados del juego
     val gameState by gameViewModel.gameState.collectAsState()
     val ronda by gameViewModel.ronda.collectAsState()
@@ -32,12 +33,15 @@ fun SimonDiceUI(
     val colorActivo by gameViewModel.colorActivo.collectAsState()
     val botonesBrillantes by gameViewModel.botonesBrillantes.collectAsState()
 
+
     // Record persistente
     val recordPersistente by miViewModel.recordTexto.collectAsState()
     val recordPersistenteRecuadro by miViewModel.recordParaRecuadro.collectAsState()
 
-    // NUEVO: Información de SQLite
-    val dbInfo by miViewModel.dbInfo.collectAsState()
+
+    // NUEVO: Información del Top 10
+    val top10Info by miViewModel.top10Info.collectAsState()
+
 
     Column(
         modifier = Modifier
@@ -46,13 +50,28 @@ fun SimonDiceUI(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // MODIFICADO: Pasamos dbInfo también
-        HeaderInfo(ronda, recordPersistenteRecuadro, text, gameState, recordPersistente, dbInfo)
+        // MODIFICADO: Pasamos top10Info también
+        HeaderInfo(ronda, recordPersistenteRecuadro, text, gameState, recordPersistente, top10Info)
         BotonesColores(gameViewModel, colorActivo, botonesBrillantes, gameState)
         BotonControl(gameViewModel, gameState)
 
+
+        // NUEVO: Botón para test Top 10
+        Button(
+            onClick = { miViewModel.testTop10Operations() },
+            modifier = Modifier
+                .width(200.dp)
+                .height(40.dp)
+        ) {
+            Text(
+                text = "Test Top 10",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
+
 
 @Composable
 fun HeaderInfo(
@@ -61,18 +80,19 @@ fun HeaderInfo(
     text: String,
     gameState: GameState,
     recordPersistente: String,
-    dbInfo: String // NUEVO parámetro
+    top10Info: String // NUEVO parámetro
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "SIMÓN DICE (SQLite)",
+            text = "SIMÓN DICE (Top 10)",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+
 
         Text(
             text = text,
@@ -81,16 +101,18 @@ fun HeaderInfo(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // NUEVO: Información de la base de datos
+
+        // NUEVO: Información del Top 10
         Text(
-            text = dbInfo,
+            text = top10Info,
             fontSize = 12.sp,
             fontWeight = FontWeight.Normal,
-            color = Color.Gray,
+            color = Color.Blue,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        // Record persistente
+
+        // Record persistente (el mejor)
         Text(
             text = recordPersistente,
             fontSize = 14.sp,
@@ -98,6 +120,7 @@ fun HeaderInfo(
             color = Color.Red,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -117,6 +140,7 @@ fun HeaderInfo(
         }
     }
 }
+
 
 
 @Composable
