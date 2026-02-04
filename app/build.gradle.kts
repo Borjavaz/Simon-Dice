@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "gz.dam.simon_dice"
-    compileSdk = 36
+    compileSdk = 36  // ← CAMBIA ESTO de 34 a 36
 
     defaultConfig {
         applicationId = "gz.dam.simon_dice"
-        minSdk = 26
-        targetSdk = 36
+        minSdk = 26  // Puedes dejarlo en 24 o subirlo a 30 si quieres
+        targetSdk = 36  // ← También cambia esto a 36
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

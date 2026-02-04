@@ -12,61 +12,109 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * ViewModel para manejar el record persistente.
+ * ViewModel para manejar el record persistente con SQLite.
  */
 class MiViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _record = MutableStateFlow(0)
     val record: StateFlow<Int> = _record.asStateFlow()
 
-    private val _recordTexto = MutableStateFlow("Sin récord")
+    private val _recordTexto = MutableStateFlow("Sin récord (SQLite)")
     val recordTexto: StateFlow<String> = _recordTexto.asStateFlow()
 
-    // AÑADIDO: Para mostrar en el recuadro de RÉCORD
+    // Para mostrar en el recuadro de RÉCORD
     private val _recordParaRecuadro = MutableStateFlow("0")
     val recordParaRecuadro: StateFlow<String> = _recordParaRecuadro.asStateFlow()
 
+    // Nuevo: Para mostrar información adicional de SQLite
+    private val _dbInfo = MutableStateFlow("Base de datos: SQLite")
+    val dbInfo: StateFlow<String> = _dbInfo.asStateFlow()
+
     init {
         cargarRecordGuardado()
+        // Opcional: Mostrar todos los records en Logcat
+        mostrarTodosRecordsEnLogcat()
     }
 
     private fun cargarRecordGuardado() {
         viewModelScope.launch {
-            val (score, timestamp) = ControladorPreference.obtenerRecordCompleto(getApplication())
+            val (score, timestamp, playerName) = ControladorSQLite.obtenerMejorRecordCompleto(getApplication())
             _record.value = score
-
-            // AÑADIDO: Actualizar también el record para el recuadro
             _recordParaRecuadro.value = score.toString()
 
-            if (timestamp > 0) {
+            if (score > 0) {
                 val date = Date(timestamp)
                 val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date)
                 val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
-                _recordTexto.value = "Récord: $score ($fecha $hora)"
+                _recordTexto.value = "Récord SQLite: $score ($fecha $hora)"
+                _dbInfo.value = "Jugador: $playerName"
             } else {
-                _recordTexto.value = "Sin récord"
+                _recordTexto.value = "Sin récord (SQLite)"
+                _dbInfo.value = "Base de datos: SQLite - Sin datos"
             }
         }
     }
 
     fun verificarYActualizarRecord(posibleRecord: Int): Boolean {
-        val recordActual = ControladorPreference.obtenerRecordScore(getApplication())
+        val resultado = ControladorSQLite.insertarRecord(getApplication(), posibleRecord)
 
-        if (posibleRecord > recordActual) {
-            ControladorPreference.actualizarRecord(getApplication(), posibleRecord)
-            _record.value = posibleRecord
+        if (resultado) {
+            viewModelScope.launch {
+                // Recargar el mejor record
+                cargarRecordGuardado()
+                _record.value = posibleRecord
+                _recordParaRecuadro.value = posibleRecord.toString()
 
-            // AÑADIDO: Actualizar también el record para el recuadro
-            _recordParaRecuadro.value = posibleRecord.toString()
+                // Mostrar mensaje de éxito
+                val now = Date()
+                val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(now)
+                val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+                _recordTexto.value = "¡NUEVO RÉCORD SQLite! $posibleRecord ($fecha $hora)"
 
-            val now = Date()
-            val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(now)
-            val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
-            _recordTexto.value = "Récord: $posibleRecord ($fecha $hora)"
-
+                // Mostrar todos los records actualizados
+                mostrarTodosRecordsEnLogcat()
+            }
             return true
         }
-
         return false
+    }
+
+    private fun mostrarTodosRecordsEnLogcat() {
+        viewModelScope.launch {
+            val todosRecords = ControladorSQLite.obtenerTodosRecords(getApplication())
+            android.util.Log.d("SQLite_ViewModel", "=== TODOS LOS RECORDS EN DB ===")
+            todosRecords.forEachIndexed { index, (score, timestamp, player) ->
+                val fecha = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                    .format(Date(timestamp))
+                android.util.Log.d("SQLite_ViewModel", "${index + 1}. $player: $score ($fecha)")
+            }
+            android.util.Log.d("SQLite_ViewModel", "============================")
+        }
+    }
+
+    // Función adicional para testing desde la UI
+    fun testSQLiteOperations() {
+        viewModelScope.launch {
+            android.util.Log.d("SQLite_Test", "=== INICIANDO PRUEBAS SQLite ===")
+
+            // 1. Insertar datos de prueba
+            ControladorSQLite.insertarRecord(getApplication(), 5)
+            ControladorSQLite.insertarRecord(getApplication(), 3)
+            ControladorSQLite.insertarRecord(getApplication(), 8)
+            ControladorSQLite.insertarRecord(getApplication(), 2)
+
+            // 2. Obtener mejor record
+            val mejor = ControladorSQLite.obtenerMejorRecordScore(getApplication())
+            android.util.Log.d("SQLite_Test", "Mejor record después de inserciones: $mejor")
+
+            // 3. Obtener todos los records
+            val todos = ControladorSQLite.obtenerTodosRecords(getApplication())
+            android.util.Log.d("SQLite_Test", "Total de records en DB: ${todos.size}")
+
+            // 4. Recargar en ViewModel
+            cargarRecordGuardado()
+
+            android.util.Log.d("SQLite_Test", "=== PRUEBAS COMPLETADAS ===")
+        }
     }
 }

@@ -164,13 +164,22 @@ class VM : ViewModel() {
         }
     }
 
+    // En la función verificarRecordPersistente() cambia:
     private fun verificarRecordPersistente() {
         recordViewModel?.let { mvvm ->
             if (mvvm.verificarYActualizarRecord(_ronda.value)) {
                 _record.value = _ronda.value  // Actualiza también el record local
+
+                // Log adicional para SQLite
+                android.util.Log.d("SQLite_Game",
+                    "Nuevo record guardado en SQLite: ${_ronda.value}")
+            } else {
+                android.util.Log.d("SQLite_Game",
+                    "Score ${_ronda.value} no es un nuevo record")
             }
         }
     }
+
 
     private fun secuenciaCorrecta() {
         viewModelScope.launch {
