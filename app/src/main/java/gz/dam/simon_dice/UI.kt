@@ -24,6 +24,7 @@ fun SimonDiceUI(
 ) {
     val context = LocalContext.current
 
+
     // Estados del juego
     val gameState by gameViewModel.gameState.collectAsState()
     val ronda by gameViewModel.ronda.collectAsState()
@@ -33,10 +34,15 @@ fun SimonDiceUI(
     val botonesBrillantes by gameViewModel.botonesBrillantes.collectAsState()
     val sonidoEvent by gameViewModel.sonidoEvent.collectAsState()
 
-    // Record persistente
+    //Record persistente con nombre del jugador
     val recordPersistente by miViewModel.recordTexto.collectAsState()
-    // AÑADIDO: Record persistente para el recuadro
     val recordPersistenteRecuadro by miViewModel.recordParaRecuadro.collectAsState()
+
+
+
+    //infodel jugador
+    val playerName by miViewModel.playerName.collectAsState()
+    val playerInfo by miViewModel.playerInfo.collectAsState()
 
 
     Column(
@@ -46,31 +52,42 @@ fun SimonDiceUI(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // MODIFICADO: Pasamos recordPersistenteRecuadro
-        HeaderInfo(ronda, recordPersistenteRecuadro, text, gameState, recordPersistente)
+        //tmb paso playerInfo también
+        HeaderInfo(ronda, recordPersistenteRecuadro, text, gameState, recordPersistente, playerInfo, playerName)
         BotonesColores(gameViewModel, colorActivo, botonesBrillantes, gameState)
+
+
+        //Botones nuevos para gestión de jugador y records
+        PlayerManagementSection(miViewModel)
+
+
         BotonControl(gameViewModel, gameState)
     }
 }
 
+
 @Composable
 fun HeaderInfo(
     ronda: Int,
-    record: String,  // CAMBIADO: Ahora es String para aceptar recordPersistenteRecuadro
+    record: String,
     text: String,
     gameState: GameState,
-    recordPersistente: String
+    recordPersistente: String,
+    //info y nombre del jugador
+    playerInfo: String,
+    playerName: String
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "SIMÓN DICE",
+            text = "SIMÓN DICE (Room)",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+
 
         Text(
             text = text,
@@ -79,21 +96,24 @@ fun HeaderInfo(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Record persistente - CAMBIADO A COLOR ROJO
+
+        // record
         Text(
             text = recordPersistente,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Red,  // CAMBIADO: De Blue a Red
+            color = Color.Red,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             InfoBox("RONDA", ronda.toString())
-            // MODIFICADO: Usamos el record persistente en el recuadro
+            //muestro tmb nombre del jugador actual
+            InfoBox("JUGADOR", playerName.take(8)) // Limitar a 8 caracteres
             InfoBox("RÉCORD", record)
             InfoBox("ESTADO", when (gameState) {
                 is GameState.Inicio -> "INICIO"
@@ -107,6 +127,7 @@ fun HeaderInfo(
         }
     }
 }
+
 
 @Composable
 fun InfoBox(titulo: String, valor: String) {
@@ -126,12 +147,30 @@ fun InfoBox(titulo: String, valor: String) {
     }
 }
 
+
+//gestion del jugador
+@Composable
+fun PlayerManagementSection(miViewModel: MiViewModel) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+        }
+
+    }
+}
+
 @Composable
 fun BotonesColores(
     viewModel: VM,
     colorActivo: Int,
     botonesBrillantes: Boolean,
     gameState: GameState
+
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row {
@@ -151,7 +190,6 @@ fun BotonesColores(
                 gameState = gameState
             )
         }
-
         Spacer(modifier = Modifier.height(20.dp))
 
         Row {
@@ -170,6 +208,7 @@ fun BotonesColores(
                 enabled = botonesBrillantes,
                 gameState = gameState
             )
+
         }
     }
 }
@@ -184,7 +223,7 @@ fun BotonColor(
 ) {
     val estaActivo = colorActivo == color.colorInt
 
-    // USANDO TUS COLORES EXACTOS
+
     val colorBoton = when {
         estaActivo || enabled -> when (color) {
             Colores.ROJO -> Color(0xFFE53935)     // SimonRed
@@ -192,6 +231,7 @@ fun BotonColor(
             Colores.AZUL -> Color(0xFF1E88E5)    // SimonBlue
             Colores.AMARILLO -> Color(0xFFFDD835) // SimonYellow
         }
+
         else -> when (color) {
             Colores.ROJO -> Color(0xFFB71C1C)     // SimonRedDark
             Colores.VERDE -> Color(0xFF1B5E20)   // SimonGreenDark
@@ -212,8 +252,8 @@ fun BotonColor(
             .size(140.dp)
             .border(4.dp, Color.Black, CircleShape)
     ) {
-        // Botón sin contenido adicional
     }
+
 }
 
 @Composable
@@ -222,6 +262,7 @@ fun BotonControl(viewModel: VM, gameState: GameState) {
         is GameState.Inicio, is GameState.GameOver -> "START"
         else -> "RESTART"
     }
+
 
     Button(
         onClick = {
@@ -241,5 +282,6 @@ fun BotonControl(viewModel: VM, gameState: GameState) {
         )
     }
 }
+
 
 
